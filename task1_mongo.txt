@@ -1,47 +1,106 @@
-const SID = "12403030209";
-const examDB = db.getSiblingDB("exam_" + SID);
-examDB.courses.deleteMany({});
-examDB.courses.insertMany([
-    {
-        _id: "COURSE-" + SID + "-01",
-        title: "NoSQL数据库",
-        teacher: "张老师",
-        status: "OPEN",
-        chapters: [
-            { chapterId: "CH01", title: "MongoDB 基础", hours: 2 },
-            { chapterId: "CH02", title: "Redis 基础", hours: 2 },
+> const SID = "12403030209";
+uncaught exception: SyntaxError: redeclaration of const SID :
+@(shell):1:1
+> const examDB = db.getSiblingDB("exam_" + SID);
+uncaught exception: SyntaxError: redeclaration of const examDB :
+@(shell):1:1
+> // 初始化（只跑一次，后面重复测试不要再执行）
+> examDB.courses.deleteMany({});
+{ "acknowledged" : true, "deletedCount" : 3 }
+> examDB.courses.insertMany([
+...   {
+...     _id: "COURSE-" + SID + "-01",
+...     title: "NoSQL数据库",
+...     teacher: "张老师",
+...     status: "OPEN",
+...     chapters: [
+...       { chapterId: "CH01", title: "MongoDB基础", hours: 2 },
+...       { chapterId: "CH02", title: "Redis基础", hours: 2 }
+...     ]
+...   },
+...   {
+...     _id: "COURSE-" + SID + "-02",
+...     title: "数据库原理",
+...     teacher: "张老师",
+...     status: "CLOSED",
+...     chapters: [
+...       { chapterId: "CH01", title: "关系模型", hours: 2 }
+...     ]
+...   },
+...   {
+...     _id: "COURSE-" + SID + "-03",
+...     title: "机器学习",
+...     teacher: "李老师",
+...     status: "OPEN",
+...     chapters: [
+...       { chapterId: "CH01", title: "分类", hours: 2 },
+...       { chapterId: "CH02", title: "聚类", hours: 2 }
+...     ]
+...   }
+... ]);
+{
+        "acknowledged" : true,
+        "insertedIds" : [
+                "COURSE-12403030209-01",
+                "COURSE-12403030209-02",
+                "COURSE-12403030209-03"
         ]
-    },
-    {
-        _id: "COURSE-" + SID + "-02",
-        title: "数据库原理",
-        teacher: "张老师",
-        status: "CLOSED",
-        chapters: [
-            { chapterId: "CH01", title: "关系模型", hours: 2 }
+}
+>
+> // 1. 查询：张老师、OPEN，输出课程编号、课程名、章节数量
+> examDB.courses.aggregate([
+...   {$match: {teacher:"张老师", status:"OPEN"}},
+...   {$project: {_id:1, title:1, chapterCount: {$size:"$chapters"}}}
+... ]);
+{ "_id" : "COURSE-12403030209-01", "title" : "NoSQL数据库", "chapterCount" : 2 }
+>
+> // 2. 修改01课程CH02标题：Redis基础与应用-9，局部更新
+> examDB.courses.updateOne(
+...   {_id:"COURSE-" + SID + "-01", "chapters.chapterId":"CH02"},
+...   {$set: {"chapters.$.title": "Redis基础与应用-9"}}
+... );
+{ "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+> examDB.courses.findOne({_id:"COURSE-" + SID + "-01"});
+{
+        "_id" : "COURSE-12403030209-01",
+        "title" : "NoSQL数据库",
+        "teacher" : "张老师",
+        "status" : "OPEN",
+        "chapters" : [
+                {
+                        "chapterId" : "CH01",
+                        "title" : "MongoDB基础",
+                        "hours" : 2
+                },
+                {
+                        "chapterId" : "CH02",
+                        "title" : "Redis基础与应用-9",
+                        "hours" : 2
+                }
         ]
-    },
-    {
-        _id: "COURSE-" + SID + "-03",
-        title: "机器学习",
-        teacher: "李老师",
-        status: "OPEN",
-        chapters: [
-            { chapterId: "CH01", title: "分类", hours: 2 },
-            { chapterId: "CH02", title: "聚类", hours: 2 }
-        ]
-    }
-]);
-examDB.courses.aggregate([
-    { $match: { teacher: "张老师", status: "OPEN" } },
-    { $project: { _id: 1, title: 1, chapterCount: { $size: "$chapters" } } }
-])
-examDB.courses.updateOne(
-    { _id: "COURSE-" + SID + "-01", "chapters.chapterId": "CH02" },
-    { $set: { "chapters.$.title": "Redis 基础与应用-9" } }
-)
-examDB.courses.updateOne(
-    {_id:"COURSE-"+SID+"-01"},
-    {$push:{chapters:{chapterId:"CH03",title:"Redis集群",hours:2}}}
-)
-examDB.courses.find({_id:"COURSE-"+SID+"-01"})
+}
+>
+> // 3. 新增CH03，防重复！重点：$addToSet，连续跑两次也不会重复
+> examDB.courses.updateOne(
+...   {_id:"COURSE-" + SID + "-01"},
+...   {$addToSet: {chapters: {chapterId:"CH03", title:"Redis高级操作", hours: 11}}}
+... );
+{ "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+> examDB.courses.updateOne(
+...   {_id:"COURSE-" + SID + "-01"},
+...   {$addToSet: {chapters: {chapterId:"CH03", title:"Redis高级操作", hours: 11}}}
+... );
+{ "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 0 }
+> // 4. 核验，cmd里mongosh直接查
+> let doc = examDB.courses.findOne({_id:"COURSE-" + SID + "-01"});
+> doc.chapters.find(c=>c.chapterId=="CH02").title
+Redis基础与应用-9
+> doc.chapters.filter(c=>c.chapterId=="CH03").length
+1
+> doc.chapters.length
+3
+> doc.teacher
+张老师
+> doc.status
+OPEN
+局部更新只修改指定内容，不会改动文档其他字段；直接替换整个文档容易误覆盖原有数据、并发时发生更新丢失，传输数据量更大。
