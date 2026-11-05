@@ -1,0 +1,17 @@
+C:\Users\33073\PycharmProjects\PythonProject1\.venv\Scripts\python.exe C:\Users\33073\PycharmProjects\PythonProject1\04.py 
+【T1 正常订购】
+初始库存:9, 购买量:1, 结果:False, 信息:Transaction numbers are only allowed on a replica set member or mongos, full error: {'ok': 0.0, 'errmsg': 'Transaction numbers are only allowed on a replica set member or mongos', 'code': 20, 'codeName': 'IllegalOperation'}
+最终库存:9, 订单数:0
+
+【T2 连续购买直到库存不足】
+T2成功次数:0, 最后库存:9
+
+【T3 中途异常回滚】
+初始库存:9, 购买量:1, 结果:False, 信息:Transaction numbers are only allowed on a replica set member or mongos, full error: {'ok': 0.0, 'errmsg': 'Transaction numbers are only allowed on a replica set member or mongos', 'code': 20, 'codeName': 'IllegalOperation'}
+最终库存:9, 订单数:0
+
+【T4 连续 Stock/Buy +1 次订购】
+T4 尝试次数:10,成功:0,最终库存:9
+
+
+进程已结束，退出代码为 0

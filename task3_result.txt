@@ -1,0 +1,34 @@
+C:\Users\33073\PycharmProjects\PythonProject1\.venv\Scripts\python.exe C:\Users\33073\PycharmProjects\PythonProject1\05.py 
+===== 1.Hash学生信息 =====
+单独读取 studentName： 张三
+单独读取 status： learning
+完整Hash： {'studentId': '12403030209', 'studentName': '张三', 'className': 'COURSE-12403030209-01', 'status': 'learning'}
+提交 CH01，本次新增数量：1
+提交 CH02，本次新增数量：1
+提交 CH02，本次新增数量：0
+提交 CH03，本次新增数量：1
+全部已完成章节： {'CH01', 'CH02', 'CH03'}
+集合元素总数： 3
+CH02 是否完成： 1
+CH04 是否完成： 0
+
+===== 3.ZSet成绩排行 =====
+分数从高到低前3名： [('demo01', 90.0), ('12403030209', 89.0), ('demo04', 80.0)]
+本人分数+10之后：
+更新后前3名： [('12403030209', 99.0), ('demo01', 90.0), ('demo04', 80.0)]
+本人 12403030209 当前名次：第1名
+
+===== 4.会话过期验证 =====
+创建立刻读取，value： 自定义会话标识  剩余TTL： 5
+等待6秒...
+6s后读取，value： None  剩余TTL： -2
+
+===== 5.数据类型简答 =====
+
+Hash：适合存储对象、多条属性（学生信息），字段独立读写；
+Set：无序不重复集合，适合去重场景（已学章节）；
+Sorted Set(ZSet)：带权重有序集合，适合排行榜、排序需求；
+String：简单K-V，适合短文本、验证码、临时会话。
+
+
+进程已结束，退出代码为 0

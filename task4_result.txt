@@ -1,0 +1,11 @@
+C:\Users\33073\PycharmProjects\PythonProject1\.venv\Scripts\python.exe C:\Users\33073\PycharmProjects\PythonProject1\06.py 
+===== Task4 写入性能对比 N=1000 =====
+方案A（逐条）耗时：79.21 ms
+方案B（Pipeline）耗时：5.01 ms
+
+简答：
+Pipeline减少客户端与Redis之间来回网络RTT，多条命令打包一次性发送、一次性返回，降低网络开销，速度更快；
+逐条写入每一条都要单独网络往返，网络等待开销大，更慢。
+
+
+进程已结束，退出代码为 0
